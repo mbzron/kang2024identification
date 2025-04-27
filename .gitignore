@@ -1,0 +1,9 @@
+.RData
+.Rhistory
+*.RData
+
+GSE193337_RAW
+*.tar
+*.gz
+
+results
