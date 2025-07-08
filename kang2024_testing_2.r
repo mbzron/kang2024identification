@@ -31,22 +31,22 @@ sce <- FindVariableFeatures(sce, selection.method = "vst",
   dispersion.cutoff = c(1.5, Inf)
 )
 
-print("Running 'SketchData'")
-sce <- SketchData(
-  object = sce,
-  ncells = 10000,
-  method = "LeverageScore",
-  sketched.assay = "sketch"
-)
+# print("Running 'SketchData'")
+# sce <- SketchData(
+#   object = sce,
+#   ncells = 10000,
+#   method = "LeverageScore",
+#   sketched.assay = "sketch"
+# )
 
-print("Running 'DefaultAssay'")
-DefaultAssay(sce) <- "sketch"
+# print("Running 'DefaultAssay'")
+# DefaultAssay(sce) <- "sketch"
 
 print("Running 'ScaleData'")
-sce <- ScaleData(sce)  # , features = rownames(sce))
+sce <- ScaleData(sce, features = rownames(sce))
 
 print("Running 'RunPCA'")
-sce <- RunPCA(sce)  # , features = VariableFeatures(sce))
+sce <- RunPCA(sce, features = VariableFeatures(sce))
 
 elbowplot <- ElbowPlot(sce, ndims = 50, reduction = "pca")
 ggsave("results/elbowplot.pdf", elbowplot, height = 5, width = 5)
@@ -69,10 +69,10 @@ sce <- FindClusters(
   object = sce, resolution = c(seq(.1, 1, .1))
 )
 
-# colnames(sce@meta.data)
-# clustree(sce@meta.data, prefix = "RNA_snn_res.")
-# pdf("results/clust.snn_res.pdf", he = 15, wi = 15)
-# clustree(sce@meta.data, prefix = "RNA_snn_res.")
+
+pdf("results/clust.snn_res.pdf", he = 15, wi = 15)
+clustree(sce@meta.data, prefix = "RNA_snn_res.")
+dev.off()
 
 resolution <- 0.8
 
@@ -82,8 +82,8 @@ sce <- FindNeighbors(object = sce, dims = 1:dims)
 print("Running 'FindClusters'")
 sce <- FindClusters(object = sce, resolution = resolution)
 
-# print("Running 'DefaultAssay(sce) <- RNA'")
-# DefaultAssay(sce) <- "RNA"  # fibroblast: 9, 11, 21
+print("Running 'DefaultAssay(sce) <- RNA'")
+DefaultAssay(sce) <- "RNA"  # fibroblast: 9, 11, 21
 
 print("Running 'VlnPlot'")
 VlnPlot(sce, features = c("CD68", "CD86", "CD163"),
@@ -115,22 +115,22 @@ figs2ab <- ggarrange(figs2a, figs2b, nrow = 1,
 
 table(sce$seurat_clusters)
 
-# save(sce, file = 'sce1.RData')
-# load('sce1.RData')
+save(sce, file = 'sce1.RData')
+load('sce1.RData')
 
 Idents(sce) <- "seurat_clusters"
 sce <- subset(sce, idents = c())
 resolution <- 0.1
 
-# DefaultAssay(sce) <- "RNA"
+DefaultAssay(sce) <- "RNA"
 
-print("Running 'FindNeighbors' with DefaultAssay <- sketch")
+# print("Running 'FindNeighbors' with DefaultAssay <- sketch")
 sce <- FindNeighbors(object = sce, dims = 1:dims)
 
-print("Running 'FindClusters' with DefaultAssay <- sketch")
+# print("Running 'FindClusters' with DefaultAssay <- sketch")
 sce <- FindClusters(object = sce, resolution = resolution)
 
-# DefaultAssay(sce) <- "RNA"
+DefaultAssay(sce) <- "RNA"
 
 VlnPlot(sce, features = c("CD68", "CD86", "CD163"),
   pt.size = 0, group.by = "seurat_clusters", ncol = 2
@@ -164,7 +164,7 @@ Idents(sce) <- "seurat_clusters"
 
 sce <- JoinLayers(sce)
 
-print("Running 'FindAllMarkers")
+print("Running 'FindAllMarkers'")
 sce_markers <- FindAllMarkers(object = sce, logfc.threshold = logfc,
                               min.pct = minpct, only.pos = TRUE)
 
@@ -182,7 +182,7 @@ top5 <- sce_markers %>%
   slice_max(n = 5, order_by = avg_log2FC) %>%
   ungroup()
 
-top5 <- intersect(unique(top5$gene), rownames(sce@assays$RNA))
+top5 <- intersect(unique(top5$gene), rownames(sce@assays$RNA@features))
 
 sc_marker_dotplot <- DotPlot(
   object = sce, features = top5, cols = c("blue", "red"), scale = TRUE
