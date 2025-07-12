@@ -1,4 +1,4 @@
-# install requirements for single cell analysis (split over multiple lines for readability)
+# install requirements for single-cell seq analysis (split over multiple lines for readability)
 install.packages(c(
   "Seurat",
   "dplyr",
@@ -15,4 +15,8 @@ install.packages(c(
   "ggsci",
   "clustree",
   "randomcoloR",
+  "BiocManager",
 ), dependencies = TRUE)
+
+BiocManager::install("clusterProfiler")
+BiocManager::install("org.Hs.eg.db")
