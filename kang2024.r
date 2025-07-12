@@ -113,6 +113,11 @@ figs2ab
 table(sce$seurat_clusters)
 #
 save(sce,file = 'sce1.RData')
+
+##################################
+###################################
+##################################
+
 load('sce1.RData')
 Idents(sce)='seurat_clusters' sce<-subset(sce,idents =c())
 Resolution <- 0.1
@@ -234,6 +239,11 @@ fig1f<-dotplot(sce.markers2.enrich.res)+
 theme(axis.text.x = element_text(angle = 45,hjust = 1,size=10), axis.text.y=element_text(size=10))
 fig1f
 save(sce,file = 'sce.RData')
+
+##################################
+###################################
+##################################
+
 load('sce.RData')
 library(copykat)
 copykat <- function (rawmat = rawdata, id.type = "S", cell.line = "no", ngene.chr = 0, LOW.DR = 0.05, UP.DR = 0.1, win.size = 25, norm.cell.names = "", KS.cut = 0.1, sam.name = "", distance ="euclidean", n.cores = 1) {
@@ -565,6 +575,11 @@ fig1ab<-ggarrange(fig1a,fig1b,nrow = 1,ncol=2,labels = c('A','B'),widths = c(1,1
 fig1=ggarrange(fig1ab,sc_marker_dotplot,fig1ef,labels = c('','C',''),nrow = 3,ncol = 1,heights =c(2,1,1))
 ggsave(filename = 'results/Fig1.pdf',plot = fig1,he=15,wi=18)
 ggsave(filename = 'results/Fig1.jpg',plot = fig1,he=15,wi=18)
+
+##################################
+###################################
+##################################
+
 library(Seurat)
 library(dplyr)
 library(ggplot2)
@@ -578,6 +593,7 @@ library(data.table)
 library(RColorBrewer)
 library(ggpubr)
 library(ggsci)
+
 load('../01.scRNA/sce.RData')
 pathway.score<-function(exp,gene){
 ssGSEAScore_by_genes<-function(gene.exp,genes){

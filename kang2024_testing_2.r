@@ -115,8 +115,8 @@ figs2ab <- ggarrange(figs2a, figs2b, nrow = 1,
 
 table(sce$seurat_clusters)
 
-save(sce, file = 'sce1.RData')
-load('sce1.RData')
+save(sce, file = "sce1.RData")
+load("sce1.RData")
 
 Idents(sce) <- "seurat_clusters"
 sce <- subset(sce, idents = c())
@@ -191,3 +191,153 @@ sc_marker_dotplot <- DotPlot(
 
 ggsave("results/sc_marker_dotplot.pdf",
        sc_marker_dotplot, height = 7, width = 9)
+
+###
+bubble_df <- as.matrix(sce[["RNA"]]$data[top5, ])
+bubble_df <- t(bubble_df)
+bubble_df <- as.data.frame(scale(bubble_df))
+bubble_df$CB <- rownames(bubble_df)
+bubble_df <- merge(
+  bubble_df,
+  data.frame(
+    CB = rownames(sce@meta.data),
+    celltype = sce@meta.data$seurat_clusters
+  ),
+  by = "CB"
+)
+bubble_df$CB <- NULL
+celltype_v <- c()
+gene_v <- c()
+mean_v <- c()
+ratio_v <- c()
+for (i in unique(bubble_df$celltype)) {
+  bubble_df_small <- bubble_df %>% filter(celltype == i)
+  for (j in top5) {
+    exp_mean <- mean(bubble_df_small[, j])
+    exp_ratio <- sum(
+      bubble_df_small[, j] > min(bubble_df_small[, j])
+    ) / length(bubble_df_small[, j])
+    celltype_v <- append(celltype_v, i)
+    gene_v <- append(gene_v, j)
+    mean_v <- append(mean_v, exp_mean)
+    ratio_v <- append(ratio_v, exp_ratio)
+  }
+}
+
+plotdf <- data.frame(
+  celltype = celltype_v, gene = gene_v, exp = mean_v, ratio = ratio_v
+)
+
+plotdf$celltype <- factor(
+  plotdf$celltype, levels = unique(as.character(sce_markers$cluster))
+)
+plotdf$gene <- factor(plotdf$gene, levels = rev(as.character(top5)))
+plotdf$exp <- ifelse(plotdf$exp > 3, 3, plotdf$exp)
+sc_marker_dotplot1 <- plotdf %>%
+  ggplot(
+    aes(x = celltype, y = gene, size = ratio, color = exp)
+  ) + geom_point() + scale_x_discrete("") + scale_y_discrete("") +
+  scale_color_gradientn(
+    colours = rev(c("#FFD92F", "#FEE391", brewer.pal(11, "Spectral")[7:11]))
+  ) + scale_size_continuous(limits = c(0, 1)) + theme_bw() + theme(
+  axis.text.x.bottom = element_text(hjust = 1, vjust = 1, angle = 45)
+)
+
+ggsave(
+  "results/sc_marker_dotplot1.pdf", sc_marker_dotplot1, height = 7, width = 9
+)
+
+mycolor <- ggsci::pal_jama()(9)
+fig1a <- DimPlot(sce, dims = c(1, 2), group.by = "Samples", reduction = "umap",
+  label = "F", pt.size = 0.5,
+  label.size = 5
+) +  theme(
+  axis.line = element_line(size = 0.1, colour = "black"),
+  # axis.text = element_blank(),
+  # axis.title = element_blank(),
+  # axis.ticks = element_blank(),
+) + ggtitle("") + guides(colour = guide_legend(ncol = 1))
+
+fig1b <- DimPlot(
+  sce, cols = mycolor, group.by = "seurat_clusters",
+  reduction = "umap", split.by = "type",
+  label = "F", pt.size = 0.5, label.size = 5
+) + theme(axis.line = element_line(size = 0.1, colour = "black"),
+  # axis.text = element_blank(),
+  # axis.title = element_blank(),
+  # axis.ticks = element_blank(),
+) + ggtitle("")
+
+Idents(sce) <- "seurat_clusters"
+library("ggplot2")
+
+sample_clust <- as.matrix(table(sce$Samples, sce$seurat_clusters))
+sample_clust <- apply(sample_clust, 1, function(x){return(x/sum(x))})
+sample_clust <- reshape2::melt(sample_clust)
+colnames(sample_clust) <- c("cluster", "Samples", "proportion")
+sample_clust$cluster <- paste0("CAF_", sample_clust$cluster)
+write.table(
+  sample_clust, "results/sample_clust1.txt",
+  quote = FALSE, row.names = TRUE, sep = "\t"
+)
+clust_freq <- as.data.frame(table(sce$Samples))
+
+colnames(clust_freq) <- c("Samples", "cell_num")
+
+clust_freq <- clust_freq[order(clust_freq$cell_num, decreasing = TRUE), ]
+clust_freq$Samples <- factor(clust_freq$Samples, levels = clust_freq$Samples)
+sample_clust$Samples <- factor(
+  sample_clust$Samples, levels = clust_freq$Samples
+)
+
+fig1e1 <- ggplot(
+  sample_clust, aes(x = Samples, y = proportion, fill = cluster)
+) + geom_bar(stat = "identity", position = "fill") +
+  ggtitle("") + scale_fill_manual(values = mycolor) +
+  theme_bw() + theme(
+  axis.ticks.length = unit(0.1, "cm"),
+  legend.position = "left"
+) + xlab("") +
+  coord_flip() + scale_y_continuous(expand = expand_scale(mult = c(0, 0))
+)
+
+sample_color <- pal_nejm(alpha = 0.5)(8)[1:8]
+fig1e2 <- ggplot(clust_freq, aes(x = Samples, y = cell_num, fill = Samples)) +
+  geom_bar(stat = "identity") + ggtitle("") +
+  theme_bw() + scale_fill_manual(values = sample_color) +
+  theme(
+    axis.ticks.length = unit(0, "cm"),
+    axis.text.y = element_blank(),
+    axis.title.y = element_blank()
+  ) + coord_flip() + scale_y_continuous(
+  expand = expand_scale(mult = c(0, 0))
+) + ylim(0, max(clust_freq$cell_num) + 10)
+
+fig1e3 <- ggpubr::ggarrange(
+  fig1e1,
+  fig1e2,
+  nrow = 1,
+  ncol = 2,
+  widths = c(2, 1)
+)
+
+library(clusterProfiler)
+library(org.Hs.eg.db)
+ids <- bitr(
+  sce_markers$gene, "SYMBOL", "ENTREZID", "org.Hs.eg.db"
+) ## 将 SYMBOL 转成ENTREZID
+sce_markers2 <- merge(sce_markers, ids, by.x = "gene", by.y = "SYMBOL")
+gcsample <- split(sce_markers2$ENTREZID, sce_markers2$cluster)
+
+## KEGG
+sce_markers2_enrich_res <- compareCluster(
+  gcsample, fun = "enrichKEGG",
+  organism = "hsa", pvalueCutoff = 0.05
+)
+
+fig1f <- dotplot(sce_markers2_enrich_res) + theme(
+  axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
+  axis.text.y = element_text(size = 10)
+)
+
+save(sce, file = "sce.RData")
