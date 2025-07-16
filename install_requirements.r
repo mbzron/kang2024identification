@@ -16,7 +16,11 @@ install.packages(c(
   "clustree",
   "randomcoloR",
   "BiocManager",
+  "devtools",
 ), dependencies = TRUE)
 
 BiocManager::install("clusterProfiler")
 BiocManager::install("org.Hs.eg.db")
+
+library(devtools)
+devtools::install_github("navinlabcode/copykat")
