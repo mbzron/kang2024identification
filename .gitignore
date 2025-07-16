@@ -6,5 +6,10 @@ GSE193337_RAW
 *.tar
 *.gz
 *.pdf
+*.rds
 
 results
+
+copykat_breakdown.r
+
+LUAD_copykat_CNA_raw_results_gene_by_cell.txt
