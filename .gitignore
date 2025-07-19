@@ -12,4 +12,6 @@ results
 
 copykat_breakdown.r
 
-LUAD_copykat_CNA_raw_results_gene_by_cell.txt
+*.txt
+
+*.jpeg
