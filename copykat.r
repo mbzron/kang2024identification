@@ -356,11 +356,11 @@ copykat <- function(
     }
 
     com.preN <- names(hc.umap)
-    com.preN[which(hc.umap == which(cl.ID == max(cl.ID)))] <- "diploid" 
-    com.preN[which(hc.umap == which(cl.ID == min(cl.ID)))] <- "aneuploid" 
+    com.preN[which(hc.umap == which(cl.ID == max(cl.ID)))] <- "diploid"
+    com.preN[which(hc.umap == which(cl.ID == min(cl.ID)))] <- "aneuploid"
     names(com.preN) <- names(hc.umap)
     if (WNS == "unclassified.prediction") {
-      com.preN[which(com.preN == "diploid")] <- "c1:diploid:low.conf" 
+      com.preN[which(com.preN == "diploid")] <- "c1:diploid:low.conf"
       com.preN[which(com.preN == "nondiploid")] <- "c2:aneuploid:low.conf"
     }
 

@@ -17,6 +17,8 @@ install.packages(c(
   "randomcoloR",
   "BiocManager",
   "devtools",
+  "GMD",
+  "pheatmap"
 ), dependencies = TRUE)
 
 BiocManager::install("clusterProfiler")
@@ -24,3 +26,4 @@ BiocManager::install("org.Hs.eg.db")
 
 library(devtools)
 devtools::install_github("navinlabcode/copykat")
+devtools::install_github("cran/GMD")
