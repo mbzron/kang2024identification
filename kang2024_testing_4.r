@@ -42,13 +42,47 @@ ssGSEAScore_by_genes <- function(gene.exp, genes) {
 
 pathway.score <- function(exp, gene) {
 
-  pathway_score <- data.frame()
+  filename <- "pathway_scores.txt"
 
-  for (i in unique(gene[, 2])){
-    gene_set <- gene[gene[, 2] == i, 1]
-    score <- ssGSEAScore_by_genes(exp,gene_set)
-    rownames(score) <- i
-    pathway_score <- rbind.data.frame(pathway_score, score)
+  if (file.exists(filename)) {
+
+    # load pathway scores from file
+    print(paste0("Loading pathway scores from ", filename))
+    pathway_score <- read.table(
+      filename,       # The name of your file
+      sep = "\t",     # Tab-separated file
+      header = TRUE,  # Assuming the first row is headers/column names
+      row.names = 1,  # First column contains row names
+      quote = ""      # Specify quote as "" if no quotes were used
+    )
+
+  } else {
+
+    pathway_score <- data.frame()
+
+    for (i in unique(gene[, 2])){
+
+      # display progress
+      print(paste0("Processing pathway: ", i))
+
+      gene_set <- gene[gene[, 2] == i, 1]
+      score <- ssGSEAScore_by_genes(exp, gene_set)
+      rownames(score) <- i
+      pathway_score <- rbind.data.frame(pathway_score, score)
+
+    }
+
+    # write pathway_scores to file
+    write.table(
+      pathway_score,
+      filename,
+      quote = FALSE,
+      row.names = TRUE,
+      sep = "\t"
+    )
+
+    print(paste0("Pathway scores saved to ", filename))
+
   }
 
   t(pathway_score)
@@ -65,7 +99,7 @@ tumor.pathway <- tumor.pathway[, c("Gene", "OG.TSG")]
 
 #每一个细胞计算得分
 tumor.pathway.score <- pathway.score(
-  exp = as.matrix(sce@assays$RNA@counts), gene = tumor.pathway
+  exp = as.matrix(sce@assays$RNA$counts), gene = tumor.pathway
 )
 head(tumor.pathway.score)
 
@@ -88,7 +122,7 @@ head(copykat.test)
 table(copykat.test$copykat.pred)
 
 tumor.score.copy <- cbind.data.frame(
-  tumor.pathway.score.group[copykat.test$cell.names,],
+  tumor.pathway.score.group[copykat.test$cell.names, ],
   copykat.pred = copykat.test$copykat.pred
 )
 
@@ -100,10 +134,12 @@ library(pheatmap)
 head(tumor.score.copy)
 table(tumor.score.copy$copykat.pred)
 
+print(colnames(tumor.score.copy))
+
 tumor.score.copy <- tumor.score.copy[,
   c("Samples",
     "seurat_clusters",
-    "CellCyle",
+    "Cell.Cycle",
     "HIPPO",
     "MYC",
     "NOTCH",
@@ -117,17 +153,17 @@ tumor.score.copy <- tumor.score.copy[,
   )
 ]
 
-# colnames(tumor.score.copy)[9]
-colnames(tumor.score.copy)[9] <- "TGF-Beta"
-mat <- tumor.score.copy[,as.character(unique(tumor.pathway$OG.TSG))]
+# print(colnames(tumor.score.copy)[9])
+# colnames(tumor.score.copy)[9] <- "TGF-Beta"
+mat <- tumor.score.copy[, as.character(unique(tumor.pathway$OG.TSG))]
 
-anno_col <- tumor.score.copy[,c("seurat_clusters","copykat.pred")]
+anno_col <- tumor.score.copy[, c("seurat_clusters", "copykat.pred")]
 
-anno_col <- anno_col[order(anno_col$copykat.pred,anno_col$seurat_clusters),]
+anno_col <- anno_col[order(anno_col$copykat.pred, anno_col$seurat_clusters), ]
 
 pdf("results/Fig2a.pdf", height = 9, width = 12)
 pheatmap::pheatmap(
-  t(mat[rownames(anno_col),]),
+  t(mat[rownames(anno_col), ]),
   scale = "row",
   show_colnames = FALSE,
   annotation_col = anno_col,
@@ -202,8 +238,8 @@ plotiBarplot <- function(
 
   tp.dat <- as.data.frame(cbind(bg = row.names(dat), dat))
   tp.dat[, 1] <- as.character(tp.dat[, 1])
-  for(i in 2:ncol(tp.dat)){
-    tp.dat[, i] = as.numeric(as.character(tp.dat[, i]))
+  for (i in 2:ncol(tp.dat)) {
+    tp.dat[, i] <- as.numeric(as.character(tp.dat[, i]))
   }
 
   mt.df <- reshape2::melt(tp.dat)
@@ -212,10 +248,10 @@ plotiBarplot <- function(
     geom_bar(stat = "identity", width = lineW, col = lineCol)
   if (showLine) {
     for (i in 2:(ncol(tp.dat) - 1)) {
-      tmp <- tp.dat[order(tp.dat[,1], decreasing = TRUE), ]
+      tmp <- tp.dat[order(tp.dat[, 1], decreasing = TRUE), ]
       tmp[, i] <- base::cumsum(tmp[, i])
       tmp[, i + 1] <- base::cumsum(tmp[, i + 1])
-      colnames(tmp)[c(i, i + 1)] = c("STY", "ED")
+      colnames(tmp)[c(i, i + 1)] <- c("STY", "ED")
       tmp1 <- cbind(
         tmp,
         STX = rep(i - 1 + lineW / 2, nrow(tmp)),
@@ -266,14 +302,14 @@ plotiBarplot <- function(
   g.tb <- reshape2::melt(g.tb)
   colnames(g.tb) <- c("A1", "A2", "A3")
   g.tb$A4 <- paste0(g.tb[, 3], ifelse(g.tb[, 3] > -log10(0.05), "(*)", ""))
-  stable.p <- ggplot(g.tb, aes(A1, A2))
-  + geom_tile(aes(fill = A3), colour = "white")
-  + xlab("")
-  + ylab("")
-  + scale_fill_gradient(low = "white", high = "steelblue")
-  + geom_text(aes(x = A1, y = A2, label = A4))
-  + theme(
-    legend.position="none",
+  stable.p <- ggplot(g.tb, aes(A1, A2)) +
+  geom_tile(aes(fill = A3), colour = "white") +
+  xlab("") +
+  ylab("") +
+  scale_fill_gradient(low = "white", high = "steelblue") +
+  geom_text(aes(x = A1, y = A2, label = A4)) +
+  theme(
+    legend.position = "none",
     axis.title.x = element_blank(),
     axis.text.x = element_blank()
   )
@@ -339,12 +375,13 @@ Muti_Boxplot <- function(
     add = "boxplot"
   ) +
   stat_compare_means(
-    aes(group = group),
-    method <- test_method,
-    symnum.args <- list(
+    mapping = aes(group = group),
+    data = dat1,
+    method = test_method,
+    symnum.args = list(
       cutpoints = c(0, 0.001, 0.01, 0.05, 1),
-      symbols <- c("***", "**", "*", "ns")
-    ), label <- "p.signif"
+      symbols = c("***", "**", "*", "ns")
+    ), label = "p.signif"
   ) + theme(
     axis.text.x = element_text(angle = 30, hjust = 1)
   ) + labs(fill = leg)
@@ -356,7 +393,7 @@ fig2d <- Muti_Boxplot(
     as.character(unique(tumor.pathway$OG.TSG))
   ],
   group = tumor.pathway.score.group1$copykat.pred,
-  group_cols = ggsci::pal_lancet()(9)[c(2,1)],
+  group_cols = ggsci::pal_lancet()(9)[c(2, 1)],
   test_method = "wilcox.test",
   leg = "CAF_0", ylab = "GSVA Score"
 )
