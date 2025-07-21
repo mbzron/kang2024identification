@@ -23,6 +23,8 @@ install.packages(c(
 
 BiocManager::install("clusterProfiler")
 BiocManager::install("org.Hs.eg.db")
+BiocManager::install("GSEABase")
+BiocManager::install("GSVA")
 
 library(devtools)
 devtools::install_github("navinlabcode/copykat")
