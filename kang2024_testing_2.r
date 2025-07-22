@@ -69,12 +69,11 @@ sce <- FindClusters(
   object = sce, resolution = c(seq(.1, 1, .1))
 )
 
-
 pdf("results/clust.snn_res.pdf", he = 15, wi = 15)
 clustree(sce@meta.data, prefix = "RNA_snn_res.")
 dev.off()
 
-resolution <- 0.8
+resolution <- 0.8  # according to page 3/13, resolution = 0.1.
 
 print("Running 'FindNeighbors'")
 sce <- FindNeighbors(object = sce, dims = 1:dims)

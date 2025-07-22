@@ -42,19 +42,13 @@ ssGSEAScore_by_genes <- function(gene.exp, genes) {
 
 pathway.score <- function(exp, gene) {
 
-  filename <- "pathway_scores.txt"
+  filename <- "pathway_scores.RData"
 
   if (file.exists(filename)) {
 
     # load pathway scores from file
     print(paste0("Loading pathway scores from ", filename))
-    pathway_score <- read.table(
-      filename,       # The name of your file
-      sep = "\t",     # Tab-separated file
-      header = TRUE,  # Assuming the first row is headers/column names
-      row.names = 1,  # First column contains row names
-      quote = ""      # Specify quote as "" if no quotes were used
-    )
+    load(filename)
 
   } else {
 
@@ -72,14 +66,8 @@ pathway.score <- function(exp, gene) {
 
     }
 
-    # write pathway_scores to file
-    write.table(
-      pathway_score,
-      filename,
-      quote = FALSE,
-      row.names = TRUE,
-      sep = "\t"
-    )
+    # save pathway scores to RData file
+    save(pathway_score, file = filename)
 
     print(paste0("Pathway scores saved to ", filename))
 
@@ -128,13 +116,15 @@ tumor.score.copy <- cbind.data.frame(
 
 head(tumor.score.copy)
 table(tumor.score.copy$copykat.pred)
-tumor.score.copy$seurat_clusters <- paste0('CAF_', tumor.score.copy$seurat_clusters)
+tumor.score.copy$seurat_clusters <- paste0(
+  "CAF_", tumor.score.copy$seurat_clusters
+)
 
 library(pheatmap)
 head(tumor.score.copy)
 table(tumor.score.copy$copykat.pred)
 
-print(colnames(tumor.score.copy))
+# print(colnames(tumor.score.copy))
 
 tumor.score.copy <- tumor.score.copy[,
   c("Samples",
@@ -209,7 +199,8 @@ plotiBarplot <- function(
   lineCol = "black",
   legTitle = "Group",
   showValue = FALSE,
-  showLine = TRUE) {
+  showLine = TRUE
+) {
 
   xlb <- ""
   ylb <- ""
@@ -276,7 +267,7 @@ plotiBarplot <- function(
     label = lbc
   )
   pg <- pg + labs(x = xlb, y = ylb) + theme(legend.position = "bottom")
-  # pg <- pg + scale_fill_discrete(breaks = paste0("R", seq_len(dat)), label = lbr, name=legTitle)
+  # pg <- pg + scale_fill_discrete(breaks = paste0("R", seq_len(dat)), label = lbr, name = legTitle)
   pg <- pg + scale_fill_manual(
     breaks = paste0("R", seq_len(nrow(dat))),
     label = lbr,
