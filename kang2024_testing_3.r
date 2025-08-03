@@ -35,7 +35,8 @@ stopifnot("sce" %in% ls())
 if (!file.exists("copykat.test.RData")) {
   source("copykat_breakdown.r")
   copykat_test <- copykat_simplified(
-    n_cores = 6, subset_percentage = 0.25, plot_heatmap = FALSE
+    n_cores = 6,
+    subset_percentage = data_subset_proportion, plot_heatmap = FALSE
   )
   save(copykat_test, file = "copykat.test.RData")
 }
