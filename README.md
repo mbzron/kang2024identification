@@ -9,7 +9,7 @@ The original study published its analysis script as a .pdf file. This repo was c
 ## Data
 Input data was downloaded from [www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE193337](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE193337) (GSE193337_RAW.tar).
 
-To organize the data into the directory structure expected by the analysisR-script, cd into the same directory as GSE193337_RAW and run
+To organize the data into the required directory structure, cd into the same directory as GSE193337_RAW and run
 
 ```. createDataDirs.sh```
 
@@ -17,7 +17,11 @@ To organize the data into the directory structure expected by the analysisR-scri
 
 Install R package dependencies with
 
-```source("install_requirements.r")```
+```Rscript install_requirements.r```
+
+or, in an R session, run
+
+```source("install_requirements.r")```.
 
 Install linux dependencies with
 
@@ -25,7 +29,7 @@ Install linux dependencies with
 
 ## Debugging Installation of FGSEA during clusterProfiler install
 
-Installation of the R-package 'clusterProfiler' threw errors that seemed to relate to failed compilation of c++ programs during installation of the dependent R-package, FGSEA. 
+Installation of the R-package 'clusterProfiler' may throw errors relating to failed compilation of c++ programs during installation of the dependent package, FGSEA. 
 
 I.e.,
 
@@ -53,4 +57,12 @@ To run the full workflow, at the command line, run
 
 OR, start an R session (e.g., by entering "R" at the command line), and run the line
 
-```> source("kang2024_master")```
+```> source("kang2024_master")```.
+
+### Parameters
+
+The script "kang2024_master" contains two parameters: ```use_existing_files``` and ```data_subset_proportion```. These parameters are designed to help run the analysis on personal computer or laptop. (Without using these parameters, I encountered problems running the full analysis on a Dell 5310 laptop with 32 GB RAM and x8 intel CORE i7 processors.)
+
+Set ```use_existing_files <- TRUE``` to make use of existing data-dump files (variously written as *.RData, *.rds, *.txt) created during prior executions of the script to avoiding re-running the corresponding analyses.
+
+Set ```data_subset_proportion``` in the range 0 < data_subset_proportion < 1 to run the Tumor/normal classification package 'copykat' on a subset of the data to reduce the computational workload.
