@@ -343,8 +343,7 @@ break
 }
 WNS <- "run with known normal" preN <- norm.cell.names
 norm.mat.relat <- norm.mat.smooth - basel
-}
-else {
+} else {
 basa <- baseline.norm.cl(norm.mat.smooth = norm.mat.smooth, min.cells = 5, n.cores = n.cores)
 basel <- basa$basel
 WNS <- basa$WNS
@@ -360,7 +359,7 @@ WNS <- paste("copykat failed in locating normal cells; manual adjust performed w
 length(preN), " immune cells", sep = "")
 print(WNS)
 basel <- apply(norm.mat.smooth[, which(colnames(norm.mat.smooth) %in%preN)], 1, mean)
-}else {
+} else {
 basa <- baseline.GMM(CNA.mat = norm.mat.smooth, max.normal = 5, mu.cut = 0.05, Nfraq.cut = 0.99, RE.before = basa, n.cores = n.cores)
 basel <- basa$basel
 WNS <- basa$WNS

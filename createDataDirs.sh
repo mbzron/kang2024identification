@@ -1,6 +1,6 @@
 #!/bin/bash
 
-untar -xzf GSE193337_RAW.tar
+tar -xvf GSE193337_RAW.tar
 
 PARENTDIR='GSE193337_RAW'
 mkdir $PARENTDIR

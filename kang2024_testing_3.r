@@ -10,7 +10,8 @@ keep <- c(
   "fig1f",
   "fig1a",
   "fig1b",
-  "sc_marker_dotplot"
+  "sc_marker_dotplot",
+  "cyclegenes"
 )
 variables_to_remove <- c()
 variables_to_remove <- setdiff(ls(), keep)
@@ -18,32 +19,102 @@ rm(list = variables_to_remove)
 
 stopifnot("sce" %in% ls())
 
-# source("copykat.r")
+# Define log file
+log_file <- "my_log.txt"
 
-# copykat_test <- copykat(
-#   rawmat = sce@assays$RNA$counts,
-#   id_type = "S",
-#   cell_line = "no",
-#   ngene_chr = 5,
-#   win_size = 25,
-#   KS.cut = 0.15,
-#   sam_name = "LUAD",
-#   distance = "euclidean",
-#   n.cores = 6
-# )
+# Function to write to log
+log_message <- function(message) {
+  timestamp <- format(Sys.time(), "%Y-%m-%d %H:%M:%S")
+  full_message <- paste0("[", timestamp, "] ", message, "\n")
+  print(full_message)
+  cat(full_message, file = log_file, append = TRUE)
+}
+
+n_cores <- 6
+use_existing_files <- TRUE
+data_subset_proportion <- 0.1
+id.type <- "S"
+LOW.DR <- 0.05
+UP.DR <- 0.1
+
+log_message("step1: read and filter data ...")
+
+rawmat <- sce@assays$RNA$counts
+
+der <- apply(rawmat, 1, function(x) (sum(x > 0))) / ncol(rawmat)
+
+if (sum(der > LOW.DR) >= 1) {
+  rawmat <- rawmat[which(der > LOW.DR), ]
+  log_message(paste(nrow(rawmat), " genes past LOW.DR filtering", sep = ""))
+}
+
+WNS1 <- "data quality is ok"
+
+if (nrow(rawmat) < 7000) {
+  WNS1 <- "low data quality"
+  UP.DR <- LOW.DR
+  log_message("WARNING: low data quality; assigned LOW.DR to UP.DR...")
+}
+
+log_message("step 2: annotations gene coordinates ...")
+
+anno.mat <- annotateGenes.hg20(mat = rawmat, ID.type = id.type)
+anno.mat <- anno.mat[order(anno.mat$abspos, decreasing = FALSE), ]
+HLAs <- anno.mat$hgnc_symbol[grep("^HLA-", anno.mat$hgnc_symbol)]
+toRev <- which(anno.mat$hgnc_symbol %in% c(as.vector(cyclegenes[[1]]), HLAs))
+
+rawmat3 <- data.matrix(anno.mat[, 8:ncol(anno.mat)])
+norm.mat <- log(sqrt(rawmat3) + sqrt(rawmat3 + 1))
+norm.mat <- apply(norm.mat, 2, function(x) (x <- x - mean(x)))
+colnames(norm.mat) <- colnames(rawmat3)
+
+log_message("step 3: smoothing data with dlm ...")
+dlm.sm <- function(c) {
+  model <- dlm::dlmModPoly(order = 1, dV = 0.16, dW = 0.001)
+  x <- dlm::dlmSmooth(norm.mat[, c], model)$s
+  x <- x[2:length(x)]
+  x <- x - mean(x)
+}
+
+test.mc <- parallel::mclapply(
+  seq_len(ncol(norm.mat)), dlm.sm, mc.cores = n_cores
+)
+norm.mat.smooth <- matrix(unlist(test.mc), ncol = ncol(norm.mat), byrow = FALSE)
+colnames(norm.mat.smooth) <- colnames(norm.mat)
+
+log_message("step 4: measuring baselines ...")
+
+if (use_existing_files && file.exists("basa.rds")) {
+  log_message("Loading existing basa.rds ...")
+  basa <- readRDS("basa.rds")
+} else {
+  log_message("Creating new basa.rds ...")
+  basa <- baseline.norm.cl(
+    norm.mat.smooth = norm.mat.smooth,
+    min.cells = 5,
+    n.cores = n_cores
+  )
+  saveRDS(basa, file = "basa.rds")
+}
 
 if (!file.exists("copykat.test.RData")) {
   source("copykat_breakdown.r")
   copykat_test <- copykat_simplified(
-    n_cores = 6,
+    basa = basa,
+    norm.mat.smooth = norm.mat.smooth, # not sure about this one
+    rawmat3 = rawmat3, # not sure about this one
+    n_cores = n_cores,
     subset_percentage = data_subset_proportion, plot_heatmap = FALSE
   )
   save(copykat_test, file = "copykat.test.RData")
+} else {
+  log_message("Loading existing copykat.test.RData to variable copykat_test...")
+  load("copykat.test.RData")
 }
 
-copykat_test <- read.delim(
-  "LUAD_copykat_prediction.txt", sep = "\t", header = TRUE
-)
+# copykat_test <- read.delim(
+#   "LUAD_copykat_prediction.txt", sep = "\t", header = TRUE
+# )
 head(copykat_test)
 table(copykat_test$copykat.pred)
 
