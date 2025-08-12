@@ -232,20 +232,6 @@ if (use_existing_files && file.exists(luad_filename)) {
 
 }
 
-# keep <- c(
-#   "sce",
-#   "n_cores",
-#   "log_message",
-#   "RNA.copycat",
-#   "copykat",
-#   "log_file",
-#   "data_subset_proportion",
-#   "preN",
-#   "WNS"
-# )
-# variables_to_remove <- setdiff(ls(), keep)
-# rm(list = variables_to_remove)
-
 if (!file.exists("Aj.rds")) {
   log_message("step 6: convert to genomic bins...")
   Aj <- copykat::convert.all.bins.hg20(

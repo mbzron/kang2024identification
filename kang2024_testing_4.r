@@ -12,6 +12,8 @@ library(RColorBrewer)
 library(ggpubr)
 library(ggsci)
 
+source("logging.r")
+
 # load('../01.scRNA/sce.RData')
 load('sce.RData')
 
@@ -47,7 +49,7 @@ pathway.score <- function(exp, gene) {
   if (file.exists(filename)) {
 
     # load pathway scores from file
-    print(paste0("Loading pathway scores from ", filename))
+    logging(paste0("Loading pathway scores from ", filename))
     load(filename)
 
   } else {
@@ -77,8 +79,6 @@ pathway.score <- function(exp, gene) {
 
 }
 
-source("logging.r")
-
 log_message("reading pmid_29625050_pathway.txt...")
 #_pmid_29625050
 tumor.pathway <- read.delim(
@@ -102,7 +102,7 @@ tumor.pathway.score.group <- merge(
 )
 
 rownames(tumor.pathway.score.group) <- tumor.pathway.score.group$cell.names
-head(tumor.pathway.score.group)
+# head(tumor.pathway.score.group)
 
 tumor.pathway.score.group <- tumor.pathway.score.group[, -1]
 
@@ -119,15 +119,15 @@ tumor.score.copy <- cbind.data.frame(
   copykat.pred = copykat.test$copykat.pred
 )
 
-head(tumor.score.copy)
-table(tumor.score.copy$copykat.pred)
+# head(tumor.score.copy)
+# table(tumor.score.copy$copykat.pred)
 tumor.score.copy$seurat_clusters <- paste0(
   "CAF_", tumor.score.copy$seurat_clusters
 )
 
 library(pheatmap)
-head(tumor.score.copy)
-table(tumor.score.copy$copykat.pred)
+# head(tumor.score.copy)
+# table(tumor.score.copy$copykat.pred)
 
 # print(colnames(tumor.score.copy))
 
