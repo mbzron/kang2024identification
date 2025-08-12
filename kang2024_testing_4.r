@@ -77,11 +77,14 @@ pathway.score <- function(exp, gene) {
 
 }
 
+source("logging.r")
+
+log_message("reading pmid_29625050_pathway.txt...")
 #_pmid_29625050
 tumor.pathway <- read.delim(
   "pmid_29625050_pathway.txt", sep = "\t", header = TRUE
 )
-head(tumor.pathway)
+# head(tumor.pathway)
 
 tumor.pathway <- tumor.pathway[, c("Gene", "OG.TSG")]
 
@@ -89,8 +92,9 @@ tumor.pathway <- tumor.pathway[, c("Gene", "OG.TSG")]
 tumor.pathway.score <- pathway.score(
   exp = as.matrix(sce@assays$RNA$counts), gene = tumor.pathway
 )
-head(tumor.pathway.score)
+# head(tumor.pathway.score)
 
+log_message("mergeing tumor pathway scores with cell metadata...")
 tumor.pathway.score.group <- merge(
   data.frame(cell.names = rownames(sce@meta.data), sce@meta.data),
   data.frame(cell.names = rownames(tumor.pathway.score), tumor.pathway.score),
@@ -106,8 +110,9 @@ copykat.test <- data.frame(
   cell.names = rownames(sce@meta.data),
   copykat.pred = sce@meta.data$copykat.pred
 )
-head(copykat.test)
-table(copykat.test$copykat.pred)
+
+# head(copykat.test)
+# table(copykat.test$copykat.pred)
 
 tumor.score.copy <- cbind.data.frame(
   tumor.pathway.score.group[copykat.test$cell.names, ],
@@ -333,8 +338,8 @@ fig2b <- plotiBarplot(
 )
 
 ggsave("results/Fig2b.pdf", fig2b, height = 7, width = 10)
-head(tumor.pathway.score.group)
-table(tumor.score.copy$seurat_clusters)
+# head(tumor.pathway.score.group)
+# table(tumor.score.copy$seurat_clusters)
 
 #C0
 tumor.pathway.score.group1 <- tumor.score.copy[

@@ -188,6 +188,7 @@ sc_marker_dotplot <- DotPlot(
 ) + RotatedAxis() + ggtitle("Top 5 Marker Genes") +
   theme(plot.title = element_text(hjust = 0.5)) + xlab("")
 
+save(sc_marker_dotplot, file = "sc_marker_dotplot.RData")
 ggsave("results/sc_marker_dotplot.pdf",
        sc_marker_dotplot, height = 7, width = 9)
 
@@ -256,6 +257,7 @@ fig1a <- DimPlot(sce, dims = c(1, 2), group.by = "Samples", reduction = "umap",
   # axis.title = element_blank(),
   # axis.ticks = element_blank(),
 ) + ggtitle("") + guides(colour = guide_legend(ncol = 1))
+save(fig1a, file = "fig1a.RData")
 
 fig1b <- DimPlot(
   sce, cols = mycolor, group.by = "seurat_clusters",
@@ -266,6 +268,7 @@ fig1b <- DimPlot(
   # axis.title = element_blank(),
   # axis.ticks = element_blank(),
 ) + ggtitle("")
+save(fig1b, file = "fig1b.RData")
 
 Idents(sce) <- "seurat_clusters"
 library("ggplot2")
@@ -319,6 +322,8 @@ fig1e3 <- ggpubr::ggarrange(
   ncol = 2,
   widths = c(2, 1)
 )
+# save fig1e3 object for later use
+save(fig1e3, file = "fig1e3.RData")
 
 library(clusterProfiler)
 library(org.Hs.eg.db)
@@ -338,5 +343,6 @@ fig1f <- dotplot(sce_markers2_enrich_res) + theme(
   axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
   axis.text.y = element_text(size = 10)
 )
+save(fig1f, file = "fig1f.RData")
 
 save(sce, file = "sce.RData")

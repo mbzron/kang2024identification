@@ -16,7 +16,6 @@ library(ggsci)
 library(clustree)
 library(randomcoloR)
 
-
 dir_name <- list.dirs("GSE193337_RAW/", full.names = FALSE, recursive = FALSE)
 
 datalist <- list()
@@ -38,7 +37,7 @@ for (i in seq_along(datalist)){
   sce[["percent.mt"]] <- PercentageFeatureSet(sce, pattern = "^MT-")
   sce[["percent.Ribo"]] <- PercentageFeatureSet(sce, pattern = "^RP[SL]")
   datalist[[i]] <- sce
-  rm(sce)
+  # rm(sce)
 }
 sce <- merge(datalist[[1]], y = datalist[2:length(datalist)])
 raw_cell <- sce@meta.data
@@ -105,7 +104,8 @@ clean_cell <- sce@meta.data
 
 clean_count <- table(clean_cell$Samples)
 
-sum(clean_count) # 6410
+# display clean_count value with explanatory text
+print(paste0("sum of clean_count (expected 6410): ", sum(clean_count)))
 
 pearplot_after <- VlnPlot(
   sce,
