@@ -2,6 +2,8 @@ source("logging.r")
 library(copykat)
 n_cores <- 4
 
+log_message("step 5: segmentation...")
+
 sam_name <- "LUAD"
 sample.name <- paste(sam_name, "_copykat_", sep = "")
 luad_filename <- paste(sample.name, "CNA_raw_results.txt", sep = "")

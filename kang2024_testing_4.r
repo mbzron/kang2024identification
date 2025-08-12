@@ -49,7 +49,7 @@ pathway.score <- function(exp, gene) {
   if (file.exists(filename)) {
 
     # load pathway scores from file
-    logging(paste0("Loading pathway scores from ", filename))
+    log_message(paste0("Loading pathway scores from ", filename))
     load(filename)
 
   } else {
