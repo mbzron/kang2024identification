@@ -6,26 +6,32 @@ This is a reproduction of the analysis described in the study
 
 The original study published its analysis script as a .pdf file. This repo was created for learning purposes and (hopefully) to make the analysis more easily reproducible.
 
+## Code
+
+To clone this repository, open a terminal and run
+
+```git clone https://github.com/mbzron/kang2024identification.git```.
+
 ## Data
-Input data was downloaded from [www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE193337](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE193337) (GSE193337_RAW.tar).
+Input data was downloaded from [www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE193337](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE193337) (using the http link at the bottom of the webpage to download GSE193337_RAW.tar). Once downloaded, move or copy GSE193337.tar into your local copy of the kang2024identification project directory.
 
-To organize the data into the required directory structure, cd into the same directory as GSE193337_RAW and run
+Next, to organize the data into the required directory structure, cd into the kang2024identification directory and run
 
-```. createDataDirs.sh```
+```sh ./createDataDirs.sh```
 
 ## Install dependencies
 
-Install R package dependencies with
-
-```Rscript install_requirements.r```
-
-or, in an R session, run
-
-```source("install_requirements.r")```.
-
 Install linux dependencies with
 
-```. install_linux_requirements.sh```
+```sh ./install_linux_requirements.sh```
+
+Install R package dependencies with
+
+```(sudo) Rscript install_requirements.r```
+
+or, in an R session (i.e., after running ```(sudo) R``` at the command line), run
+
+```source("install_requirements.r")```. (NB superuser privileges may be required to write files to R/site-library.)
 
 ## Debugging Installation of FGSEA during clusterProfiler install
 
@@ -53,11 +59,11 @@ to
 
 To run the full workflow, at the command line, run
 
-```Rscript kang2024_master```
+```Rscript kang2024_master.r```
 
 OR, start an R session (e.g., by entering "R" at the command line), and run the line
 
-```> source("kang2024_master")```.
+```> source("kang2024_master.r")```.
 
 ### Parameters
 
