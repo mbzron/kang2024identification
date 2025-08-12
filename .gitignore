@@ -12,7 +12,8 @@ results
 
 copykat_breakdown.r
 
-*.txt
+my_log.txt
+LUAD_copykat_*
 *.csv
 
 *.jpeg
