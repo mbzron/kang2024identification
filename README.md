@@ -61,7 +61,7 @@ To run the full workflow, at the command line, run
 
 ```sh ./kang2024_master.sh```.
 
-Results are written to the `results' folder created during execution of this script.
+Results are written to the 'results' folder created during execution of this script.
 
 ### Parameters
 
