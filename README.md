@@ -59,16 +59,14 @@ to
 
 To run the full workflow, at the command line, run
 
-```Rscript kang2024_master.r```
+```sh ./kang2024_master.sh```.
 
-OR, start an R session (e.g., by entering "R" at the command line), and run the line
-
-```> source("kang2024_master.r")```.
+Results are written to the `results' folder created during execution of this script.
 
 ### Parameters
 
-The script "kang2024_master" contains two parameters: ```use_existing_files``` and ```data_subset_proportion```. These parameters are designed to help run the analysis on personal computer or laptop. (Without using these parameters, I encountered problems running the full analysis on a Dell 5310 laptop with 32 GB RAM and x8 intel CORE i7 processors.)
+The R scripts executed in "kang2024_master.sh" contain two parameters: ```use_existing_files``` and ```data_subset_proportion```. These parameters are designed to help run the analysis on personal computer or laptop. (Without using these parameters, I encountered problems running the full analysis on a Dell 5310 laptop with 32 GB RAM and x8 intel CORE i7 processors.)
 
-Set ```use_existing_files <- TRUE``` to make use of existing data-dump files (variously written as *.RData, *.rds, *.txt) created during prior executions of the script to avoiding re-running the corresponding analyses.
+Set ```use_existing_files <- TRUE``` to make use of existing data-dump files (variously written as *.RData, *.rds, *.txt) created during prior executions of the script to avoiding re-running the corresponding analyses every time. (I.e., use caching.)
 
 Set ```data_subset_proportion``` in the range 0 < data_subset_proportion < 1 to run the Tumor/normal classification package 'copykat' on a subset of the data to reduce the computational workload.
